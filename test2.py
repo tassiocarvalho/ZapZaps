@@ -1,7 +1,6 @@
 import socket
 import threading
 import sys
-import json
 
 message_list = []
 members = set()
@@ -25,20 +24,16 @@ def receive_messages(sock):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
-            message_data = json.loads(data.decode())  # Decodifica e converte de JSON
-
-            if message_data["type"] == "/novo_membro":
-                new_ip = message_data["ip"]
-                new_port = message_data["port"]
-                members.add((new_ip, new_port))
+            if data.decode().startswith("/novo_membro"):
+                _, new_ip, new_port = data.decode().split()
+                members.add((new_ip, int(new_port)))
                 message = f"Novo membro adicionado: {new_ip}:{new_port}"
             else:
-                message = f"{addr[0]} falou: {message_data['message']}"
-
+                message = f"{addr[0]} falou: {data.decode()}"
             message_list.append(message)
             print_message_list()
-        except Exception as e:
-            print(f"Erro ao receber a mensagem: {e}")
+        except:
+            print("Erro ao receber a mensagem.")
             return
 
 def print_message_list():
@@ -55,14 +50,19 @@ def add_member(ip, port, sock):
     new_member = (ip, port)
     members.add(new_member)
 
-    # Cria uma mensagem JSON para informar sobre o novo membro
-    new_member_data = json.dumps({"type": "/novo_membro", "ip": ip, "port": port}).encode()
-
-    # Envia a mensagem JSON para os membros existentes
+    # Informa o novo membro sobre todos os membros existentes
     for member in members:
         if member != new_member:
             try:
-                sock.sendto(new_member_data, member)
+                sock.sendto(f"/novo_membro {member[0]} {member[1]}".encode(), new_member)
+            except:
+                print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
+
+    # Informa os outros membros sobre o novo membro
+    for member in members:
+        if member != new_member:
+            try:
+                sock.sendto(f"/novo_membro {ip} {port}".encode(), member)
             except:
                 print(f"Erro ao informar {member[0]}:{member[1]} sobre o novo membro")
 
@@ -92,13 +92,10 @@ def main():
         message_list.append(f"Você: {message}")
         print_message_list()
 
-        # Cria uma mensagem JSON para enviar
-        message_data = json.dumps({"type": "message", "message": message}).encode()
-
         for member in members:
             if member != (local_ip, port):
                 try:
-                    sock.sendto(message_data, member)
+                    sock.sendto(message.encode(), member)
                 except:
                     print(f"Erro ao enviar mensagem para {member[0]}:{member[1]}")
 
