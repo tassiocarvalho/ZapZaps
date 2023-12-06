@@ -48,6 +48,15 @@ def add_member(ip, port, sock):
     global members
     new_member = (ip, port)
     members.add(new_member)
+
+    # Informa o novo membro sobre todos os membros existentes
+    for member in members:
+        if member != new_member:
+            try:
+                sock.sendto(f"/novo_membro {member[0]} {member[1]}".encode(), new_member)
+            except:
+                print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
+
     # Informa os outros membros sobre o novo membro
     for member in members:
         if member != new_member:
