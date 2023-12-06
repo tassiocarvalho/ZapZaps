@@ -60,24 +60,17 @@ def print_message_list():
 def add_member(ip, port, sock):
     global members
     new_member = (ip, port)
+    members.add(new_member)
 
-    # Primeiro, adicione o novo membro à lista de membros
-    if new_member not in members:
-        members.add(new_member)
+    # Enviar a lista completa de membros para o novo membro
+    for member in members:
+        member_data = json.dumps({'type': 'new_member', 'ip': member[0], 'port': member[1]}).encode()
+        try:
+            sock.sendto(member_data, new_member)
+        except:
+            print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
 
-        # Informa todos os membros existentes sobre o novo membro
-        new_member_data = json.dumps({'type': 'new_member', 'ip': ip, 'port': port}).encode()
-        for member in members:
-            if member != new_member:  # Não precisa informar o próprio novo membro
-                try:
-                    sock.sendto(new_member_data, member)
-                except:
-                    print(f"Erro ao informar {member[0]}:{member[1]} sobre o novo membro")
-
-        print(f"Membro {ip}:{port} adicionado com sucesso.")
-    else:
-        print(f"Membro {ip}:{port} já está na lista.")
-
+    print(f"Membro {ip}:{port} adicionado com sucesso.")
 
 def main():
     global message_list, members
