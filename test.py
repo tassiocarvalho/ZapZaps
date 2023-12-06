@@ -85,32 +85,28 @@ class UDPPeerChat:
             except ValueError:
                 print("Endereço IP ou porta inválidos.")
 
-def receive_messages(self):
-    while self.running:
-        try:
-            data, addr = self.sock.recvfrom(1024)
-            message = json.loads(data.decode())
+    def receive_messages(self):
+        while self.running:
+            try:
+                data, addr = self.sock.recvfrom(1024)
+                message = json.loads(data.decode())
 
-            if 'system' in message and message['system']:
-                system_message = f"{message['text']}"
-                self.message_history.append(system_message)
-                self.display_chat_history()
-                
-                # Verificar se é uma mensagem de novo peer e adicioná-lo
-                if "entrou na conversa" in system_message:
-                    new_peer = tuple(system_message.split()[:2])  # ('IP', 'porta')
-                    if new_peer not in self.peers:
-                        self.peers.append(new_peer)
+                if 'system' in message and message['system']:
+                    system_message = f"{message['text']}"
+                    self.message_history.append(system_message)
+                    self.display_chat_history()
 
-            else:
-                # Tratamento para mensagens comuns
-                formatted_message = f"Mensagem de {addr}: {message['text']}"
-                self.message_history.append(formatted_message)
-                self.display_chat_history()
+                    # Adicionar lógica para tratar mensagens de novo peer aqui
 
-        except Exception as e:
-            print(f"Erro ao receber mensagem: {e}")
-            self.running = False
+                else:
+                    # Tratamento para mensagens comuns
+                    formatted_message = f"Mensagem de {addr}: {message['text']}"
+                    self.message_history.append(formatted_message)
+                    self.display_chat_history()
+
+            except Exception as e:
+                print(f"Erro ao receber mensagem: {e}")
+                self.running = False
 
     def send_message(self, text):
         if text.startswith("/"):
