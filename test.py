@@ -48,6 +48,7 @@ class UDPPeerChat:
         self.host = host
         self.port = port
         self.group = Group(group_name)  # Criar um grupo
+        self.peers = []  # Inicializar a lista de peers
         self.running = True
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
@@ -66,10 +67,23 @@ class UDPPeerChat:
             self.broadcast_system_message(join_message)
 
     def broadcast_system_message(self, message):
-        # Envia uma mensagem do sistema sem adicioná-la ao histórico do remetente
-        for peer in self.peers:
+        # Envia uma mensagem do sistema para todos os membros do grupo
+        for peer in self.group.get_members():
             system_message = json.dumps({"system": True, "text": message})
             self.sock.sendto(system_message.encode(), peer)
+
+    def handle_command(self, command):
+        parts = command.split()
+        if parts[0] == "/add_member":
+            if len(parts) != 3:
+                print("Uso correto: /add_member <IP> <porta>")
+                return
+            _, ip, port = parts
+            try:
+                self.add_peer(ip, int(port))
+                print(f"Peer {ip}:{port} adicionado ao grupo.")
+            except ValueError:
+                print("Endereço IP ou porta inválidos.")
 
     def receive_messages(self):
         while self.running:
@@ -98,11 +112,14 @@ class UDPPeerChat:
                 self.running = False
 
     def send_message(self, text):
-        message = json.dumps({"sender": self.host, "text": text})  # Serializa em JSON
-        self.message_history.append(f"Você: {text}")
-        self.display_chat_history()
-        for peer in self.group.get_members():  # Enviar para membros do grupo
-            self.sock.sendto(message.encode(), peer)
+        if text.startswith("/"):
+            self.handle_command(text)
+        else:
+            message = json.dumps({"sender": self.host, "text": text})
+            self.message_history.append(f"Você: {text}")
+            self.display_chat_history()
+            for peer in self.group.get_members():
+                self.sock.sendto(message.encode(), peer)
 
     def display_chat_history(self):
         print("\n-------------- Histórico do Chat ----------------")
@@ -129,7 +146,7 @@ if __name__ == "__main__":
 
     try:
         while True:
-            message = input("Digite uma mensagem: ")
+            message = input("Digite uma mensagem ou comando: ")
             if message == '/sair':
                 print("saindo...")
                 time.sleep(2)
