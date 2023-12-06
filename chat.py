@@ -30,17 +30,16 @@ def receive_messages(sock):
 
             message_data = json.loads(data.decode())
 
-            if message_data['type'] == 'new_member':
-                # Atualiza a lista de membros quando um novo membro é adicionado
-                new_ip = message_data['ip']
-                new_port = message_data['port']
-                new_member = (new_ip, int(new_port))
-                if new_member not in members:
-                    members.add(new_member)
-                    message = f"Novo membro adicionado: {new_ip}:{new_port}"
-                    message_list.append(message)
-                    print_message_list()
+            if message_data['type'] == 'update_member_list':
+                # Atualize a lista de membros local
+                updated_members = set(tuple(m) for m in message_data['members'])
+                members = updated_members
+            elif message_data['type'] == 'new_member':
+                # Mensagem para notificar a adição de um novo membro
+                # (pode ser removida se desejar, já que a lista é atualizada acima)
+                pass
             else:
+                # Mensagens regulares
                 message = f"{addr[0]} falou: {message_data['message']}"
                 message_list.append(message)
                 print_message_list()
@@ -60,15 +59,21 @@ def print_message_list():
 def add_member(ip, port, sock):
     global members
     new_member = (ip, port)
+
+    # Atualize a lista de membros
     members.add(new_member)
 
-    # Enviar a lista completa de membros para o novo membro
+    # Enviar a lista atualizada de membros para todos os membros
+    updated_members_data = json.dumps({
+        'type': 'update_member_list',
+        'members': list(members)
+    }).encode()
+
     for member in members:
-        member_data = json.dumps({'type': 'new_member', 'ip': member[0], 'port': member[1]}).encode()
         try:
-            sock.sendto(member_data, new_member)
+            sock.sendto(updated_members_data, member)
         except:
-            print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
+            print(f"Erro ao enviar a lista de membros atualizada para {member[0]}:{member[1]}")
 
     print(f"Membro {ip}:{port} adicionado com sucesso.")
 
