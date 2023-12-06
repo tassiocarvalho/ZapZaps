@@ -41,11 +41,18 @@ class UDPPeerChat:
             try:
                 data, addr = self.sock.recvfrom(1024)
                 message = json.loads(data.decode())  # Desserializa a mensagem JSON
+
+                if addr not in self.peers:
+                    self.peers.append(addr)
+                    # Adiciona uma mensagem especial ao histórico
+                    join_message = f"{addr} entrou na conversa"
+                    self.message_history.append(join_message)
+                    self.display_chat_history()
+
                 formatted_message = f"Mensagem de {addr}: {message['text']}"
                 self.message_history.append(formatted_message)
                 self.display_chat_history()
-                if addr not in self.peers:
-                    self.peers.append(addr)
+                
             except Exception as e:
                 print(f"Erro ao receber mensagem: {e}")
                 self.running = False
