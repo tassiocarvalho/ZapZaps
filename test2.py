@@ -25,6 +25,9 @@ def receive_messages(sock):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
+            if not data:
+                continue  # Ignora se não houver dados
+
             message_data = json.loads(data.decode())
 
             if message_data['type'] == 'new_member':
@@ -55,7 +58,14 @@ def add_member(ip, port, sock):
     new_member = (ip, port)
     members.add(new_member)
 
-    new_member_data = json.dumps({'type': 'new_member', 'ip': ip, 'port': port}).encode()
+    # Agora enviando os detalhes do novo membro como JSON
+    for member in members:
+        if member != new_member:
+            new_member_data = json.dumps({'type': 'new_member', 'ip': member[0], 'port': member[1]}).encode()
+            try:
+                sock.sendto(new_member_data, new_member)
+            except:
+                print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
 
     # Informa o novo membro sobre todos os membros existentes
     for member in members:
