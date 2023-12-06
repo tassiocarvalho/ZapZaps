@@ -2,6 +2,7 @@ import socket
 import threading
 import sys
 import json
+from vetorclock import VetorClock
 
 message_list = []
 members = set()
@@ -20,7 +21,7 @@ def get_local_ip_address(target='10.255.255.255'):
             IP = '127.0.0.1'
     return IP
 
-def receive_messages(sock):
+def receive_messages(sock, vetor_clock):
     global message_list, members
     while True:
         try:
@@ -55,8 +56,8 @@ def print_message_list():
     print("(----------------------------------------------------)\n")
     print("obs: Para adicionar um novo membro no grupo digite: /add_membro <IP> <PORTA>\n")
     print("Escreva sua mensagem: ", end="")
-
-def add_member(ip, port, sock):
+    
+def add_member(ip, port, sock, vetor_clock):
     global members
     new_member = (ip, port)
 
@@ -87,7 +88,9 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((local_ip, port))
 
-    threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
+    vetor_clock = VetorClock()  # Instância do VetorClock
+
+    threading.Thread(target=receive_messages, args=(sock, vetor_clock), daemon=True).start()
 
     print_message_list()
     while True:
@@ -95,14 +98,23 @@ def main():
 
         if message.startswith("/add_membro"):
             _, member_ip, member_port = message.split()
-            add_member(member_ip, int(member_port), sock)
+            add_member(member_ip, int(member_port), sock, vetor_clock)  # Aqui também
             continue
+
+        # Incrementa o vetor de relógio para a mensagem atual
+        vetor_clock.increment((local_ip, port))
+
+        # Prepara a mensagem com o vetor de relógio
+        message_data = json.dumps({
+            'type': 'message', 
+            'message': message, 
+            'clock': vetor_clock.get_clock()
+        }).encode()
 
         message_list.append(f"Você: {message}")
         print_message_list()
 
-        message_data = json.dumps({'type': 'message', 'message': message}).encode()
-
+        # Envio da mensagem para todos os membros
         for member in members:
             if member != (local_ip, port):
                 try:

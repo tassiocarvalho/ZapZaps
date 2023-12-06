@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copie o script Python para o diretório de trabalho no container
 COPY chat.py .
+COPY vetorclock.py .
 
 # Informe ao Docker que a aplicação escuta na porta 12345
 EXPOSE 12345
