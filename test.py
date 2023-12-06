@@ -27,21 +27,38 @@ def get_local_ip_address(target='10.255.255.255'):
 
 local_ip = get_local_ip_address()
 
+class Group:
+    def __init__(self, name):
+        self.name = name
+        self.members = []
+
+    def add_member(self, member_addr):
+        if member_addr not in self.members:
+            self.members.append(member_addr)
+
+    def remove_member(self, member_addr):
+        if member_addr in self.members:
+            self.members.remove(member_addr)
+
+    def get_members(self):
+        return self.members
+
 class UDPPeerChat:
-    def __init__(self, host, port):
+    def __init__(self, host, port, group_name):
         self.host = host
         self.port = port
-        self.peers = []
+        self.group = Group(group_name)  # Criar um grupo
         self.running = True
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.host, self.port))
-        self.message_history = []  # Lista para armazenar o histórico de mensagens
+        self.message_history = []
 
     def start(self):
         threading.Thread(target=self.receive_messages).start()
 
     def add_peer(self, host, port):
         peer_addr = (host, port)
+        self.group.add_member(peer_addr)  # Adicionar membro ao grupo
         if peer_addr not in self.peers:
             self.peers.append(peer_addr)
             # Enviar mensagem de aviso sobre novo peer
@@ -84,7 +101,7 @@ class UDPPeerChat:
         message = json.dumps({"sender": self.host, "text": text})  # Serializa em JSON
         self.message_history.append(f"Você: {text}")
         self.display_chat_history()
-        for peer in self.peers:
+        for peer in self.group.get_members():  # Enviar para membros do grupo
             self.sock.sendto(message.encode(), peer)
 
     def display_chat_history(self):
@@ -99,8 +116,9 @@ class UDPPeerChat:
 
 if __name__ == "__main__":
     host = local_ip
-    port = int(input("Seu IP é: "+local_ip+ " Digite a porta para este peer: "))
-    chat = UDPPeerChat(host, port)
+    port = int(input("Seu IP é: " + local_ip + " Digite a porta para este peer: "))
+    group_name = input("Digite o nome do grupo: ")
+    chat = UDPPeerChat(host, port, group_name)
     chat.start()
 
     # Adicionar um peer externo
