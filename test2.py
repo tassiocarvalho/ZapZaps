@@ -25,10 +25,9 @@ def receive_messages(sock):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
-            print(f"Dados recebidos de {addr}: {data.decode()}")  # Log para depuração
             message_data = json.loads(data.decode())
 
-            if 'type' in message_data and message_data['type'] == 'new_member':
+            if message_data['type'] == 'new_member':
                 new_ip = message_data['ip']
                 new_port = message_data['port']
                 members.add((new_ip, int(new_port)))
@@ -62,7 +61,7 @@ def add_member(ip, port, sock):
     for member in members:
         if member != new_member:
             try:
-                sock.sendto(new_member_data, new_member)
+                sock.sendto(f"/novo_membro {member[0]} {member[1]}".encode(), new_member)
             except:
                 print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
 
@@ -70,7 +69,7 @@ def add_member(ip, port, sock):
     for member in members:
         if member != new_member:
             try:
-                sock.sendto(new_member_data, member)
+                sock.sendto(f"/novo_membro {ip} {port}".encode(), member)
             except:
                 print(f"Erro ao informar {member[0]}:{member[1]} sobre o novo membro")
 
@@ -100,7 +99,7 @@ def main():
         message_list.append(f"Você: {message}")
         print_message_list()
 
-        message_data = json.dumps({'message': message}).encode()
+        message_data = json.dumps({'type': 'message', 'message': message}).encode()
 
         for member in members:
             if member != (local_ip, port):
