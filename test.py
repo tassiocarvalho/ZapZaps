@@ -34,7 +34,21 @@ class UDPPeerChat:
         threading.Thread(target=self.receive_messages).start()
 
     def add_peer(self, host, port):
-        self.peers.append((host, port))
+        peer_addr = (host, port)
+        if peer_addr not in self.peers:
+            self.peers.append(peer_addr)
+            # Enviar mensagem de aviso sobre novo peer
+            join_message = f"{peer_addr} entrou na conversa"
+            self.broadcast_system_message(join_message)
+
+    def broadcast_system_message(self, message):
+        """Envia uma mensagem do sistema para todos os peers, incluindo o remetente."""
+        self.message_history.append(message)
+        self.display_chat_history()
+        for peer in self.peers:
+            # Envia a mensagem do sistema para todos os peers
+            system_message = json.dumps({"sender": "sistema", "text": message})
+            self.sock.sendto(system_message.encode(), peer)
 
     def receive_messages(self):
         while self.running:
