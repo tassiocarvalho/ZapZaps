@@ -91,15 +91,18 @@ class UDPPeerChat:
                 data, addr = self.sock.recvfrom(1024)
                 message = json.loads(data.decode())
 
+                # Adicionar remetente à lista de peers, se ainda não estiver
+                if addr not in self.peers:
+                    self.add_peer(*addr)
+
                 if 'system' in message and message['system']:
+                    # Processar mensagens de sistema
                     system_message = f"{message['text']}"
                     self.message_history.append(system_message)
                     self.display_chat_history()
 
-                    # Adicionar lógica para tratar mensagens de novo peer aqui
-
                 else:
-                    # Tratamento para mensagens comuns
+                    # Processar mensagens comuns
                     formatted_message = f"Mensagem de {addr}: {message['text']}"
                     self.message_history.append(formatted_message)
                     self.display_chat_history()
