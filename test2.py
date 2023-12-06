@@ -1,7 +1,6 @@
 import socket
 import threading
 import sys
-import json
 
 message_list = []
 members = set()
@@ -25,14 +24,12 @@ def receive_messages(sock):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
-            message = json.loads(data.decode())
-
-            if message["type"] == "new_member":
-                new_ip, new_port = message["ip"], message["port"]
-                members.add((new_ip, new_port))
+            if data.decode().startswith("/novo_membro"):
+                _, new_ip, new_port = data.decode().split()
+                members.add((new_ip, int(new_port)))
                 message = f"Novo membro adicionado: {new_ip}:{new_port}"
             else:
-                message = f"{addr[0]} falou: {message['text']}"
+                message = f"{addr[0]} falou: {data.decode()}"
             message_list.append(message)
             print_message_list()
         except:
@@ -53,13 +50,11 @@ def add_member(ip, port, sock):
     new_member = (ip, port)
     members.add(new_member)
 
-    new_member_message = json.dumps({"type": "new_member", "ip": ip, "port": port})
-
     # Informa o novo membro sobre todos os membros existentes
     for member in members:
         if member != new_member:
             try:
-                sock.sendto(new_member_message.encode(), new_member)
+                sock.sendto(f"/novo_membro {member[0]} {member[1]}".encode(), new_member)
             except:
                 print(f"Erro ao informar o novo membro {new_member[0]}:{new_member[1]} sobre o membro existente {member[0]}:{member[1]}")
 
@@ -67,7 +62,7 @@ def add_member(ip, port, sock):
     for member in members:
         if member != new_member:
             try:
-                sock.sendto(new_member_message.encode(), member)
+                sock.sendto(f"/novo_membro {ip} {port}".encode(), member)
             except:
                 print(f"Erro ao informar {member[0]}:{member[1]} sobre o novo membro")
 
@@ -87,15 +82,14 @@ def main():
 
     print_message_list()
     while True:
-        message_text = input()
+        message = input()
 
-        if message_text.startswith("/add_membro"):
-            _, member_ip, member_port = message_text.split()
+        if message.startswith("/add_membro"):
+            _, member_ip, member_port = message.split()
             add_member(member_ip, int(member_port), sock)
             continue
 
-        message = json.dumps({"type": "message", "text": message_text})
-        message_list.append(f"Você: {message_text}")
+        message_list.append(f"Você: {message}")
         print_message_list()
 
         for member in members:
