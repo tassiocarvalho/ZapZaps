@@ -85,31 +85,32 @@ class UDPPeerChat:
             except ValueError:
                 print("Endereço IP ou porta inválidos.")
 
-    def receive_messages(self):
-        while self.running:
-            try:
-                data, addr = self.sock.recvfrom(1024)
-                message = json.loads(data.decode())
+def receive_messages(self):
+    while self.running:
+        try:
+            data, addr = self.sock.recvfrom(1024)
+            message = json.loads(data.decode())
 
-                if 'system' in message and message['system']:
-                    # Se é uma mensagem de sistema, exiba-a de maneira diferente
-                    if addr not in self.peers:
-                        # Se o remetente é um novo peer, adicione-o
-                        self.peers.append(addr)
-                    system_message = f"{message['text']}"
-                    self.message_history.append(system_message)
-                    self.display_chat_history()
-                else:
-                    # Tratamento para mensagens comuns
-                    if addr not in self.peers:
-                        self.peers.append(addr)
-                    formatted_message = f"Mensagem de {addr}: {message['text']}"
-                    self.message_history.append(formatted_message)
-                    self.display_chat_history()
+            if 'system' in message and message['system']:
+                system_message = f"{message['text']}"
+                self.message_history.append(system_message)
+                self.display_chat_history()
                 
-            except Exception as e:
-                print(f"Erro ao receber mensagem: {e}")
-                self.running = False
+                # Verificar se é uma mensagem de novo peer e adicioná-lo
+                if "entrou na conversa" in system_message:
+                    new_peer = tuple(system_message.split()[:2])  # ('IP', 'porta')
+                    if new_peer not in self.peers:
+                        self.peers.append(new_peer)
+
+            else:
+                # Tratamento para mensagens comuns
+                formatted_message = f"Mensagem de {addr}: {message['text']}"
+                self.message_history.append(formatted_message)
+                self.display_chat_history()
+
+        except Exception as e:
+            print(f"Erro ao receber mensagem: {e}")
+            self.running = False
 
     def send_message(self, text):
         if text.startswith("/"):
