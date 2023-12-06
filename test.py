@@ -42,30 +42,32 @@ class UDPPeerChat:
             self.broadcast_system_message(join_message)
 
     def broadcast_system_message(self, message):
-        """Envia uma mensagem do sistema para todos os peers, incluindo o remetente."""
-        self.message_history.append(message)
-        self.display_chat_history()
+        # Envia uma mensagem do sistema sem adicioná-la ao histórico do remetente
         for peer in self.peers:
-            # Envia a mensagem do sistema para todos os peers
-            system_message = json.dumps({"sender": "sistema", "text": message})
+            system_message = json.dumps({"system": True, "text": message})
             self.sock.sendto(system_message.encode(), peer)
 
     def receive_messages(self):
         while self.running:
             try:
                 data, addr = self.sock.recvfrom(1024)
-                message = json.loads(data.decode())  # Desserializa a mensagem JSON
+                message = json.loads(data.decode())
 
-                if addr not in self.peers:
-                    self.peers.append(addr)
-                    # Adiciona uma mensagem especial ao histórico
-                    join_message = f"{addr} entrou na conversa"
-                    self.message_history.append(join_message)
+                if 'system' in message and message['system']:
+                    # Se é uma mensagem de sistema, exiba-a de maneira diferente
+                    if addr not in self.peers:
+                        # Se o remetente é um novo peer, adicione-o
+                        self.peers.append(addr)
+                    system_message = f"{message['text']}"
+                    self.message_history.append(system_message)
                     self.display_chat_history()
-
-                formatted_message = f"Mensagem de {addr}: {message['text']}"
-                self.message_history.append(formatted_message)
-                self.display_chat_history()
+                else:
+                    # Tratamento para mensagens comuns
+                    if addr not in self.peers:
+                        self.peers.append(addr)
+                    formatted_message = f"Mensagem de {addr}: {message['text']}"
+                    self.message_history.append(formatted_message)
+                    self.display_chat_history()
                 
             except Exception as e:
                 print(f"Erro ao receber mensagem: {e}")
@@ -102,7 +104,7 @@ if __name__ == "__main__":
 
     try:
         while True:
-            message = input("Digite uma mensagem (ou 'sair' para sair): ")
+            message = input("Digite uma mensagem: ")
             if message == '/sair':
                 print("saindo...")
                 time.sleep(2)
