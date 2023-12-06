@@ -47,15 +47,6 @@ class UDPPeerChat:
             # Enviar mensagem de aviso sobre novo peer
             join_message = f"{peer_addr} entrou na conversa"
             self.broadcast_system_message(join_message)
-            # Enviar a lista atual de peers para o novo peer
-            self.send_peer_list((host, port))
-
-    def send_peer_list(self, target_peer):
-        peer_list_message = json.dumps({
-            "system": True,
-            "peer_list": self.peers
-        })
-        self.sock.sendto(peer_list_message.encode(), target_peer)
 
     def broadcast_system_message(self, message):
         # Envia uma mensagem do sistema sem adicioná-la ao histórico do remetente
@@ -63,25 +54,13 @@ class UDPPeerChat:
             system_message = json.dumps({"system": True, "text": message})
             self.sock.sendto(system_message.encode(), peer)
 
-    def broadcast_peer_list(self):
-        for peer in self.peers:
-            self.send_peer_list(peer)
-
     def receive_messages(self):
         while self.running:
             try:
                 data, addr = self.sock.recvfrom(1024)
                 message = json.loads(data.decode())
 
-                if 'peer_list' in message:
-                    # Atualizar a lista de peers com a lista recebida
-                    for peer in message['peer_list']:
-                        if peer not in self.peers and peer != (self.host, self.port):
-                            self.peers.append(peer)
-                    # Retransmitir a lista atualizada para os próprios peers
-                    self.broadcast_peer_list()
-
-                elif 'system' in message and message['system']:
+                if 'system' in message and message['system']:
                     # Se é uma mensagem de sistema, exiba-a de maneira diferente
                     if addr not in self.peers:
                         # Se o remetente é um novo peer, adicione-o
