@@ -19,17 +19,26 @@ def get_local_ip_address(target='10.255.255.255'):
             IP = '127.0.0.1'
     return IP
 
-def receive_messages(sock):
-    global message_list
+def receive_messages(sock, local_ip, local_port):
+    global message_list, members
     while True:
         try:
             data, addr = sock.recvfrom(1024)  # Buffer size 1024 bytes
-            message = f"{addr[0]} falou: {data.decode()}"
-            message_list.append(message)
-            print_message_list()
+            if addr[0] == local_ip and addr[1] == local_port:
+                continue  # Ignora mensagens enviadas pelo próprio usuário
+
+            if data.decode().startswith("/new_member_list"):
+                # Atualiza a lista de membros
+                new_members = json.loads(data.decode().split(" ", 1)[1])
+                members.update(new_members)
+                print_message_list()
+            else:
+                message = f"{addr[0]} falou: {data.decode()}"
+                message_list.append(message)
+                print_message_list()
         except:
             print("Erro ao receber a mensagem.")
-            break
+            return
 
 def print_message_list():
     global message_list
@@ -39,10 +48,15 @@ def print_message_list():
     print("(----------------------------------------------------)")
     print("Escreva sua mensagem: ", end="")
 
-def add_member(ip, port):
+def add_member(ip, port, sock):
     global members
-    members.add((ip, port))
+    new_member = (ip, port)
+    members.add(new_member)
     print(f"Membro {ip}:{port} adicionado com sucesso.")
+    # Envia a lista de membros atualizada para todos os membros, incluindo o novo membro
+    member_list_message = "/new_member_list " + json.dumps(list(members))
+    for member in members:
+        sock.sendto(member_list_message.encode(), member)
 
 def main():
     global message_list, members
@@ -55,7 +69,7 @@ def main():
     sock.bind((local_ip, port))
 
     # Iniciando thread para receber mensagens
-    threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
+    threading.Thread(target=receive_messages, args=(sock, local_ip, port), daemon=True).start()
 
     print_message_list()
     while True:
@@ -63,7 +77,7 @@ def main():
 
         if message.startswith("/add_membro"):
             _, member_ip, member_port = message.split()
-            add_member(member_ip, int(member_port))
+            add_member(member_ip, int(member_port), sock)
             print_message_list()
             continue
 
