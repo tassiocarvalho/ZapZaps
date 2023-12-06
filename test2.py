@@ -41,7 +41,8 @@ def print_message_list():
     print("\n(----------------------Mensagens---------------------)")
     for message in message_list:
         print(message)
-    print("(----------------------------------------------------)")
+    print("(----------------------------------------------------)\n")
+    print("obs: Para adicionar um novo membro no grupo digite: /add_membro <IP> <PORTA>\n")
     print("Escreva sua mensagem: ", end="")
 
 def add_member(ip, port, sock):
