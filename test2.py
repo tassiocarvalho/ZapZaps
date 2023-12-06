@@ -25,6 +25,7 @@ def receive_messages(sock):
     while True:
         try:
             data, addr = sock.recvfrom(1024)
+            print(f"Dados recebidos de {addr}: {data.decode()}")  # Log para depuração
             message_data = json.loads(data.decode())
 
             if 'type' in message_data and message_data['type'] == 'new_member':
@@ -40,7 +41,7 @@ def receive_messages(sock):
         except Exception as e:
             print(f"Erro ao receber a mensagem: {e}")
             return
-            
+
 def print_message_list():
     global message_list
     print("\n(----------------------Mensagens---------------------)")
