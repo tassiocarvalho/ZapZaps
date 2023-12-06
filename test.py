@@ -2,6 +2,7 @@ import socket
 import threading
 import sys
 import json
+import time
 
 def get_local_ip_address(target='10.255.255.255'):
     """
@@ -50,7 +51,7 @@ class UDPPeerChat:
                 self.running = False
 
     def send_message(self, text):
-        message = json.dumps({"sender": self.host, "text": text}) 
+        message = json.dumps({"sender": self.host, "text": text})  # Serializa em JSON
         self.message_history.append(f"Você: {text}")
         self.display_chat_history()
         for peer in self.peers:
@@ -60,7 +61,7 @@ class UDPPeerChat:
         print("\n-------------- Histórico do Chat ----------------")
         for msg in self.message_history:
             print(msg)
-        print("---------------------------------------------------")
+        print("---------------------------------------------------\nobs: para sair digite /sair\n")
 
     def close(self):
         self.running = False
@@ -81,9 +82,12 @@ if __name__ == "__main__":
     try:
         while True:
             message = input("Digite uma mensagem (ou 'sair' para sair): ")
-            if message == 'sair':
-                break
-            chat.send_message(message)
+            if message == '/sair':
+                print("saindo...")
+                time.sleep(2)
+                sys.exit()
+            else:
+                chat.send_message(message)
     except KeyboardInterrupt:
         pass
     finally:
