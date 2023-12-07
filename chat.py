@@ -42,6 +42,9 @@ def receive_messages(sock, vetor_clock):
             else:
                 # Mensagens regulares
                 message = f"{addr[0]} falou: {message_data['message']}"
+                remote_clock = message_data['clock']
+                for member, timestamp in remote_clock.items():
+                    vetor_clock.update(member, timestamp)
                 message_list.append(message)
                 print_message_list()
         except Exception as e:
