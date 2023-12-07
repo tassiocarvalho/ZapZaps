@@ -22,7 +22,7 @@ def get_local_ip_address(target='10.255.255.255'):
     return IP
 
 def receive_messages(sock, vetor_clock):
-    global message_list, members, port
+    global message_list, members
     while True:
         try:
             data, addr = sock.recvfrom(1024)
@@ -39,12 +39,6 @@ def receive_messages(sock, vetor_clock):
                 # Mensagem para notificar a adição de um novo membro
                 # (pode ser removida se desejar, já que a lista é atualizada acima)
                 pass
-            elif message_data['type'] == 'chat_history':
-                # Adicionar mensagens históricas ao histórico local
-                for msg in message_data['messages']:
-                    if msg not in message_list:
-                        message_list.append(msg)
-                print_message_list()
             else:
                 # Mensagens regulares
                 message = f"{addr[0]} falou: {message_data['message']}"
@@ -67,7 +61,7 @@ def print_message_list():
     print("Escreva sua mensagem: ", end="")
     
 def add_member(ip, port, sock, vetor_clock):
-    global members, message_list
+    global members
     new_member = (ip, port)
 
     # Atualize a lista de membros
@@ -79,24 +73,16 @@ def add_member(ip, port, sock, vetor_clock):
         'members': list(members)
     }).encode()
 
-    # Enviar histórico de mensagens para o novo membro
-    history_data = json.dumps({
-        'type': 'chat_history',
-        'messages': message_list
-    }).encode()
-
     for member in members:
         try:
             sock.sendto(updated_members_data, member)
-            if member == new_member:
-                sock.sendto(history_data, new_member)  # Enviar histórico apenas para o novo membro
         except:
-            print(f"Erro ao enviar informações para {member[0]}:{member[1]}")
+            print(f"Erro ao enviar a lista de membros atualizada para {member[0]}:{member[1]}")
 
     print(f"Membro {ip}:{port} adicionado com sucesso.")
 
 def main():
-    global message_list, members, port
+    global message_list, members
     local_ip = get_local_ip_address()
     print("Seu IP é: " + local_ip)
     port = int(input("Digite a porta para usar no chat: "))
@@ -128,7 +114,7 @@ def main():
             'clock': vetor_clock.get_clock()
         }).encode()
 
-        message_list.append(f"{local_ip} falou: {message}")
+        message_list.append(f"Você: {message}")
         print_message_list()
 
         # Envio da mensagem para todos os membros
