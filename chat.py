@@ -113,6 +113,11 @@ def main():
     while True:
         message = input()
 
+        # Verifica se a mensagem está vazia
+        if not message.strip():
+            print("mensagem vazia tente novamente!")
+            continue  # Pula o restante do loop se a mensagem estiver vazia
+
         if message.startswith("/add_membro"):
             _, member_ip, member_port = message.split()
             add_member(member_ip, int(member_port), sock, vetor_clock)  # Aqui também
