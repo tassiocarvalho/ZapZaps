@@ -70,9 +70,9 @@ O módulo `chat.py` é uma aplicação de chat P2P (peer-to-peer) que utiliza so
 ## Criptografia no `chat.py`
 
 ### Contexto Atual
-No estado atual, o módulo `chat.py` não implementa criptografia nas mensagens trocadas entre os membros do chat. Esta decisão foi influenciada por vários fatores relacionados ao design inicial do algoritmo e à trajetória de desenvolvimento do projeto.
+No estado atual, o módulo `chat.py` não implementa criptografia ideal nas mensagens trocadas entre os membros do chat. Esta decisão foi influenciada por vários fatores relacionados ao design inicial do algoritmo e à trajetória de desenvolvimento do projeto, foi implemetado uma criptografia usando Cifra de César
 
-### Fatores que Influenciaram a Ausência de Criptografia
+### Fatores que Influenciaram a Ausência de Criptografia ideal
 
 1. **Estrutura do Algoritmo:**
    - O design inicial do `chat.py` foi focado em estabelecer uma comunicação básica P2P usando sockets UDP. A estrutura do algoritmo foi moldada para priorizar a funcionalidade principal de enviar e receber mensagens em um ambiente de rede simples.
@@ -87,9 +87,7 @@ No estado atual, o módulo `chat.py` não implementa criptografia nas mensagens 
    - Consequentemente, a implementação de um sistema de criptografia robusto não foi viável dentro do prazo estabelecido para este projeto.
 
 ### Considerações Futuras
-Embora a criptografia não esteja presente na versão atual do `chat.py`, ela é reconhecida como uma melhoria importante para a segurança e privacidade dos usuários. Em futuras iterações ou projetos similares, a integração de métodos de criptografia será considerada desde o início do desenvolvimento, garantindo uma comunicação mais segura.
-
-A documentação para a seção "Realização de teste do sistema" do seu repositório no GitHub pode ser aprimorada para maior clareza e detalhamento. Aqui está uma versão revisada que você pode usar:
+Embora a criptografia não esteja presente na versão atual do `chat.py`, porém foi implementada a Cifra de César que não é o aconselhavel, a criptografia assimetrica ou simetrica é reconhecida como uma melhoria importante para a segurança e privacidade dos usuários. Em futuras iterações ou projetos similares, a integração de métodos de criptografia será considerada desde o início do desenvolvimento, garantindo uma comunicação mais segura.
 
 ---
 
