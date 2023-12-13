@@ -117,7 +117,8 @@ Para facilitar o teste e a implantação, o sistema pode ser encapsulado dentro 
    ```
 
    Este comando inicia um container baseado na imagem `chat`, e o parâmetro `-it` permite a interação com o container através do terminal.
-###TESTE 
+
+#### TESTE 
 ![image](https://github.com/tassiocarvalho/ZapZaps/assets/90158519/d6a3421a-6ba2-45dd-988e-4ddfe8d7bfb1)
 imagem acima mostra 4 usuários se comunicando no grupo do chat
 
