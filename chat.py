@@ -6,6 +6,34 @@ from vetorclock import VetorClock
 
 message_list = []
 members = set()
+encrypted_message_list = []
+
+class CriptografiaCesar:
+    def __init__(self, deslocamento):
+        self.deslocamento = deslocamento
+        self.alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+
+    def criptografar(self, texto):
+        texto_criptografado = ''
+        for char in texto:
+            if char in self.alfabeto:
+                posicao = self.alfabeto.find(char)
+                nova_posicao = (posicao + self.deslocamento) % len(self.alfabeto)
+                texto_criptografado += self.alfabeto[nova_posicao]
+            else:
+                texto_criptografado += char
+        return texto_criptografado
+
+    def descriptografar(self, texto_criptografado):
+        texto = ''
+        for char in texto_criptografado:
+            if char in self.alfabeto:
+                posicao = self.alfabeto.find(char)
+                nova_posicao = (posicao - self.deslocamento) % len(self.alfabeto)
+                texto += self.alfabeto[nova_posicao]
+            else:
+                texto += char
+        return texto
 
 def get_local_ip_address(target='10.255.255.255'):
     """
@@ -21,8 +49,8 @@ def get_local_ip_address(target='10.255.255.255'):
             IP = '127.0.0.1'
     return IP
 
-def receive_messages(sock, vetor_clock):
-    global message_list, members, port
+def receive_messages(sock, vetor_clock, criptografia):
+    global message_list, members
     while True:
         try:
             data, addr = sock.recvfrom(1024)
@@ -32,22 +60,19 @@ def receive_messages(sock, vetor_clock):
             message_data = json.loads(data.decode())
 
             if message_data['type'] == 'update_member_list':
-                # Atualize a lista de membros local
                 updated_members = set(tuple(m) for m in message_data['members'])
                 members = updated_members
             elif message_data['type'] == 'new_member':
-                # Mensagem para notificar a adição de um novo membro
-                # (pode ser removida se desejar, já que a lista é atualizada acima)
                 pass
             elif message_data['type'] == 'chat_history':
-                # Adicionar mensagens históricas ao histórico local
                 for msg in message_data['messages']:
-                    if msg not in message_list:
-                        message_list.append(msg)
+                    decrypted_msg = criptografia.descriptografar(msg)
+                    if decrypted_msg not in message_list:
+                        message_list.append(decrypted_msg)
                 print_message_list()
             else:
-                # Mensagens regulares
-                message = f"{addr[0]} falou: {message_data['message']}"
+                decrypted_message = criptografia.descriptografar(message_data['message'])
+                message = f"{addr[0]} falou: {decrypted_message}"
                 remote_clock = message_data['clock']
                 for member, timestamp in remote_clock.items():
                     vetor_clock.update(member, timestamp)
@@ -79,10 +104,9 @@ def add_member(ip, port, sock, vetor_clock):
         'members': list(members)
     }).encode()
 
-    # Enviar histórico de mensagens para o novo membro
     history_data = json.dumps({
         'type': 'chat_history',
-        'messages': message_list
+        'messages': encrypted_message_list  # Altere para enviar a lista de mensagens criptografadas
     }).encode()
 
     for member in members:
@@ -106,8 +130,10 @@ def main():
     sock.bind((local_ip, port))
 
     vetor_clock = VetorClock()  # Instância do VetorClock
-
-    threading.Thread(target=receive_messages, args=(sock, vetor_clock), daemon=True).start()
+    
+    criptografia = CriptografiaCesar(deslocamento=3)  # Escolha o deslocamento desejado
+    
+    threading.Thread(target=receive_messages, args=(sock, vetor_clock, criptografia), daemon=True).start()
 
     print_message_list()
     while True:
@@ -127,12 +153,13 @@ def main():
         vetor_clock.increment((local_ip, port))
 
         # Prepara a mensagem com o vetor de relógio
+        message_encrypted = criptografia.criptografar(message)
         message_data = json.dumps({
             'type': 'message', 
-            'message': message, 
+            'message': message_encrypted, 
             'clock': vetor_clock.get_clock()
         }).encode()
-
+        encrypted_message_list.append(message_encrypted)
         message_list.append(f"{local_ip} falou: {message}")
         print_message_list()
 
