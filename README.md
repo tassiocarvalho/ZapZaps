@@ -58,3 +58,11 @@ No estado atual, o módulo `chat.py` não implementa criptografia nas mensagens 
 ### Considerações Futuras
 Embora a criptografia não esteja presente na versão atual do `chat.py`, ela é reconhecida como uma melhoria importante para a segurança e privacidade dos usuários. Em futuras iterações ou projetos similares, a integração de métodos de criptografia será considerada desde o início do desenvolvimento, garantindo uma comunicação mais segura.
 
+### Realização de teste do sistema:
+O sistema foi testado em containers sem o uso de servidor externo, não foi configurada na execução do sistema, não foi implementada no Dockerfile a funcionalidade de rodar o sistema dentro do container e escutar servidores externos.
+
+Para criar um Docker container é usado o seguinte comando
+´´´ docker build -t chat . ´´´´
+para executar 
+´´´ docker run -it chat´´´
+
