@@ -1,3 +1,34 @@
+# Introdução
+
+## Descrição do Sistema `chat.py`
+
+O `chat.py` é um sistema de chat em tempo real que opera em um modelo peer-to-peer (P2P), utilizando sockets UDP para comunicação direta entre os usuários. Este módulo foi desenvolvido com o foco em simplicidade e eficiência, permitindo a criação de grupos de chat dinâmicos onde os membros podem trocar mensagens de forma rápida e sincronizada. O sistema também implementa um mecanismo de relógio vetorial (VetorClock) para manter a consistência e a ordem causal das mensagens no ambiente distribuído.
+
+## Metodologia de Desenvolvimento
+
+### Tecnologias Utilizadas
+O desenvolvimento do `chat.py` se baseou em várias tecnologias e abordagens chave:
+
+1. **Sockets UDP:** Para a comunicação de rede, o sistema utiliza sockets UDP, que oferecem uma forma eficiente e de baixa latência para troca de mensagens em uma rede P2P.
+2. **Python 3.x:** O sistema é implementado em Python 3, aproveitando suas bibliotecas robustas para redes e concorrência.
+3. **Threads:** Utilizamos múltiplas threads para permitir a escuta simultânea de mensagens entrantes e a interação do usuário com a interface do chat.
+4. **Relógio Vetorial:** O algoritmo VetorClock é usado para manter a ordem das mensagens, garantindo que o histórico de chat seja consistente entre todos os membros do grupo.
+
+### Principais Características
+- **Comunicação P2P UDP:** Proporciona uma comunicação direta e eficiente entre os membros do chat.
+- **Gerenciamento Dinâmico de Membros:** Permite a adição e remoção de membros em tempo real sem interromper o fluxo de comunicação.
+- **Sincronização de Mensagens:** Assegura que todos os membros do chat tenham um histórico de mensagens atualizado e ordenado corretamente.
+- **Relógio Vetorial:** Implementa uma lógica de ordenação baseada em relógio vetorial para manter a consistência das mensagens em um ambiente distribuído.
+
+### Processo de Desenvolvimento
+O desenvolvimento seguiu uma abordagem iterativa:
+
+1. **Prototipagem e Design Inicial:** Iniciamos com uma versão básica para estabelecer a comunicação P2P e a interface do usuário.
+2. **Testes e Refinamento:** Após a implementação inicial, realizamos testes extensivos para identificar e corrigir falhas, além de aprimorar a performance e a usabilidade.
+3. **Integração de Funcionalidades:** Gradualmente, integramos funcionalidades adicionais, como o relógio vetorial e o gerenciamento dinâmico de membros.
+4. **Documentação e Preparação para Lançamento:** Completamos o projeto com uma documentação detalhada, preparando o sistema para uso e distribuição.
+
+
 ## Descrição
 O módulo `chat.py` é uma aplicação de chat P2P (peer-to-peer) que utiliza sockets UDP para a comunicação entre os usuários. O sistema permite adicionar novos membros ao grupo de chat e mantém um histórico de mensagens sincronizado entre todos os participantes.
 
