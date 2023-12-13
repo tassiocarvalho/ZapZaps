@@ -58,11 +58,39 @@ No estado atual, o módulo `chat.py` não implementa criptografia nas mensagens 
 ### Considerações Futuras
 Embora a criptografia não esteja presente na versão atual do `chat.py`, ela é reconhecida como uma melhoria importante para a segurança e privacidade dos usuários. Em futuras iterações ou projetos similares, a integração de métodos de criptografia será considerada desde o início do desenvolvimento, garantindo uma comunicação mais segura.
 
-### Realização de teste do sistema:
-O sistema foi testado em containers sem o uso de servidor externo, não foi configurada na execução do sistema, não foi implementada no Dockerfile a funcionalidade de rodar o sistema dentro do container e escutar servidores externos.
+A documentação para a seção "Realização de teste do sistema" do seu repositório no GitHub pode ser aprimorada para maior clareza e detalhamento. Aqui está uma versão revisada que você pode usar:
 
-Para criar um Docker container é usado o seguinte comando
-´´´ docker build -t chat . ´´´´
-para executar 
-´´´ docker run -it chat´´´
+---
+
+### Realização de Testes do Sistema
+
+#### Contexto
+O sistema foi desenvolvido para operar em containers, priorizando a independência de servidores externos. Esta abordagem assegura uma maior flexibilidade e portabilidade do sistema. No entanto, até o momento atual, a configuração para conexão com servidores externos não foi implementada, e o `Dockerfile` não está configurado para suportar a execução do sistema em modo de escuta de servidores externos.
+
+#### Criação e Execução de Containers Docker
+
+Para facilitar o teste e a implantação, o sistema pode ser encapsulado dentro de um container Docker. Seguem os passos para criar e executar o container:
+
+1. **Criação do Container:**  
+   Utilize o seguinte comando para construir a imagem Docker do sistema, substituindo `chat` pelo nome que deseja atribuir à sua imagem:
+
+   ```bash
+   docker build -t chat .
+   ```
+
+   Este comando lê o `Dockerfile` presente no diretório atual e constrói uma imagem Docker denominada `chat`.
+
+2. **Execução do Container:**  
+   Após a criação da imagem, você pode iniciar um container a partir desta imagem utilizando:
+
+   ```bash
+   docker run -it chat
+   ```
+
+   Este comando inicia um container baseado na imagem `chat`, e o parâmetro `-it` permite a interação com o container através do terminal.
+
+#### Observações Importantes
+
+- A configuração atual não permite que o sistema operando dentro do container se conecte a servidores externos. Futuras atualizações podem incluir essa funcionalidade.
+- Recomenda-se verificar e ajustar as configurações de rede do Docker conforme necessário para atender às necessidades específicas do seu ambiente de teste.
 
