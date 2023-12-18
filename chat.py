@@ -3,6 +3,7 @@ import threading
 import sys
 import json
 from vetorclock import VetorClock
+import os
 
 message_list = []
 members = set()
@@ -38,8 +39,14 @@ class CriptografiaCesar:
 def get_local_ip_address(target='10.255.255.255'):
     """
     Função para obter o endereço IP local da máquina.
-    Conecta-se a um endereço IP destino para determinar o endereço IP apropriado.
+    Primeiro verifica se a variável de ambiente HOST_IP está definida.
+    Se estiver, usa esse valor. Caso contrário, conecta-se a um endereço IP destino
+    para determinar o endereço IP apropriado.
     """
+    host_ip = os.environ.get('HOST_IP')
+    if host_ip:
+        return host_ip
+
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         try:
             # Não é necessário enviar dados, apenas iniciar a conexão
