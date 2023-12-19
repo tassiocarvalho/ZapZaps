@@ -14,6 +14,9 @@ O desenvolvimento do `chat.py` se baseou em várias tecnologias e abordagens cha
 3. **Threads:** Utilizamos múltiplas threads para permitir a escuta simultânea de mensagens entrantes e a interação do usuário com a interface do chat.
 4. **Relógio Vetorial:** O algoritmo VetorClock é usado para manter a ordem das mensagens, garantindo que o histórico de chat seja consistente entre todos os membros do grupo.
 
+![image](https://github.com/tassiocarvalho/ZapZaps/assets/90158519/e59672ee-7f80-4509-8036-9cab7f1a8bbf)
+
+
 ### Principais Características
 - **Comunicação P2P UDP:** Proporciona uma comunicação direta e eficiente entre os membros do chat.
 - **Gerenciamento Dinâmico de Membros:** Permite a adição e remoção de membros em tempo real sem interromper o fluxo de comunicação.
